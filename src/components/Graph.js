@@ -3,6 +3,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 're
 import {Dropdown,Row,Col, Button} from 'react-bootstrap';
 import axios from 'axios'
 import './Graph.css'
+import 'react-responsive-modal/styles.css';
+import { Modal } from 'react-responsive-modal';
+import nodemailer from 'nodemailer';
 class Graph extends PureComponent {
     constructor(props) {
         super(props)
@@ -17,7 +20,9 @@ class Graph extends PureComponent {
              finaldata:' ',
              year:'',
              month:'',
-             day:''
+             day:'',
+             email:'',
+             showModal:false
         }
     }
     
@@ -47,6 +52,48 @@ class Graph extends PureComponent {
             end:event.target.value
         })
     }
+    clickSubmit=()=>{
+        console.log("clicked submit")
+        this.setState({
+            showModal:true
+        })
+    }
+    closeSubmit =()=>{
+        this.setState({
+            showModal:false
+        })
+    }
+    emailChange =event =>{
+        this.setState({
+            email:event.target.vallue
+        })
+    }
+    sendEmail =event =>{
+        event.preventDefault();
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'vjk2018@gmail.com',
+              pass: 'karthik2000'
+            }
+          });
+          
+          var mailOptions = {
+            from: 'vjk2018@gmail.com',
+            to: `${this.state.email}`,
+            subject: 'Graph of Deceased vs Dates',
+            text: 'It will be attached along with this mail.'
+          };
+          
+          transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+        } 
+    
     submitHandler = event=>{
         event.preventDefault();
         const data ={
@@ -79,9 +126,18 @@ class Graph extends PureComponent {
             this.setState({errorMsg:"Error retreiving graph data"})
         })
     }
-
-    
+   
+    clickDownload(){
+        console.log("Clicked Download");
+        var a = document.body.appendChild(
+            document.createElement("a")
+        );
+        a.download = "export";
+        a.href = "data:application/pdf," + document.getElementsByClassName("d-flex align-items-center justify-content-center graph").innerHTML;
+        a.click();
+    }
   render() {
+   
     const data = [
         {
           date: '30/01/2020', deaths:4000  
@@ -149,7 +205,7 @@ class Graph extends PureComponent {
             </Row><br />
             <Row>
                     <Col>
-                        <label for="start">start Date</label><br />
+                        <label for="start">Start Date</label><br />
                         <input type="date" value={this.state.start} onChange={this.startChange} name="start" />
                     </Col>
 
@@ -162,10 +218,11 @@ class Graph extends PureComponent {
             </form>
             <br />            
             <br />
-            <Row>
+            <Row  >
                 <Col>
-            <div class="d-flex align-items-center justify-content-center" >
-                <LineChart
+            <div class="d-flex align-items-center justify-content-center graph" >
+                
+                <LineChart 
                     width={1000}
                     height={300}
                     data = {data}
@@ -181,15 +238,28 @@ class Graph extends PureComponent {
                 </div>
                 </Col>
       </Row>
+        
       <Row>
           <Col>
-            <button>Download</button>
+            <button onClick={this.clickDownload}>Download</button>
           </Col>
 
           <Col>
-            <button>Send Mail</button>
+          <button onClick={this.clickSubmit}>Send Mail</button>
+          <Modal classNames={{
+                                animationIn: 'customEnterAnimation',
+                                animationOut: 'customLeaveAnimation',
+                                }} animationDuration={1000}  open={this.state.showModal} onClose={this.closeSubmit} blockScroll={false} center  >
+                            <br />
+                            <h2>Enter your E-Mail</h2><br />
+                            <form onSubmit={this.sendEmail}>
+                                <input type="text" value={this.state.email} onChange={this.emailChange} /><br /><br />
+                                <button>Submit</button>
+                            </form>
+                    </Modal>
           </Col>
       </Row>
+      
       </div>
     );
   }
