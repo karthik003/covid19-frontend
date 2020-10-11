@@ -5,7 +5,6 @@ import axios from 'axios'
 import './Graph.css'
 import 'react-responsive-modal/styles.css';
 import { Modal } from 'react-responsive-modal';
-import nodemailer from 'nodemailer';
 class Graph extends PureComponent {
     constructor(props) {
         super(props)
@@ -70,29 +69,7 @@ class Graph extends PureComponent {
     }
     sendEmail =event =>{
         event.preventDefault();
-        var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: 'vjk2018@gmail.com',
-              pass: 'karthik2000'
-            }
-          });
-          
-          var mailOptions = {
-            from: 'vjk2018@gmail.com',
-            to: `${this.state.email}`,
-            subject: 'Graph of Deceased vs Dates',
-            text: 'It will be attached along with this mail.'
-          };
-          
-          transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-              console.log(error);
-            } else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
-        } 
+    }
     
     submitHandler = event=>{
         event.preventDefault();
@@ -116,7 +93,7 @@ class Graph extends PureComponent {
         }
         console.log("sending post request");
 
-        axios.post('http://localhost:3000/get_filtered_data', { data})
+        axios.post('https://vithack2020-covid-problems.herokuapp.com/get_filtered_data', { data})
         .then(response =>{
             console.log(response.data);
             this.setState({postsdata:response.data})
